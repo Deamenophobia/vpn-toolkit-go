@@ -1,8 +1,35 @@
+# Local builds and diagnostics
 /bin/
 /dist/
-/vpn.yaml
-/private/
-/bundle*/
+/vpnctl
+/vpnctl.exe
 *.log
 *.test
 coverage.out
+
+# Local settings, state, and key material
+vpn.yaml
+private/
+state.json
+state.lock
+.env
+.env.*
+!.env.example
+!.env.sample
+*.key
+*.pem
+*.p12
+*.pfx
+
+# Generated bundles and credential-bearing exports, wherever saved
+bundle*/
+*-bundle*/
+server.json
+server.next.json
+server.previous.json
+*.mihomo.yaml
+*.stash-proxy.yaml
+*.surge-proxy.conf
+*.sing-box-outbound.json
+*.uri.txt
+*.qr.png
