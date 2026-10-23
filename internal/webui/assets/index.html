@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>VPN toolkit · Local workspace</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar"><div class="brand">◈ <span>VPN toolkit</span></div><span class="local-badge"><i></i> Local workspace</span></header>
+  <main>
+    <div class="intro"><div><p class="eyebrow">YOUR SERVER. YOUR CONNECTION.</p><h1>A simpler way to set up.</h1><p class="lede">Prepare an encrypted connection to your own server.</p></div><button id="reload" class="secondary" type="button" hidden>Refresh settings</button></div>
+    <div id="notice" role="status" aria-live="polite" hidden></div>
+    <section id="auth-panel" class="card" hidden>
+      <h2>Open your private workspace</h2><p>Use the full launch link printed by <code>vpnctl ui</code>, or paste its token below. The token changes every time the UI starts.</p>
+      <form id="auth-form"><label for="token">Launch token</label><div class="inline"><input id="token" type="password" autocomplete="off" required><button type="submit">Open workspace</button></div></form>
+    </section>
+    <div id="workspace" hidden>
+      <div class="summary"><div><span class="caption">SERVER</span><strong id="summary-server">Not configured</strong></div><div><span class="caption">PROTOCOL</span><strong>AnyTLS <span class="muted">/ sing-box</span></strong></div><div><span class="caption">ACTIVE DEVICES</span><strong id="summary-devices">0</strong></div></div>
+      <aside class="boundary"><span class="boundary-icon">i</span><div><strong>Configuration workspace</strong><p>This page prepares files. It does not connect your computer or update your server. Deploy the server files, then connect through Clash Verge Rev or another compatible client.</p></div></aside>
+      <div class="layout">
+        <section class="card server-card">
+          <div class="section-heading"><span class="step">01</span><div><h2>Server settings</h2><p>Choose where your traffic will exit.</p></div><span id="saved-badge" class="tag">Setup needed</span></div>
+          <form id="settings-form">
+            <div class="fields"><label>Server address<input id="address" placeholder="vpn.example.com" required autocomplete="off"><small>A hostname or IP address, without a URL prefix.</small></label><label>Port<input id="port" type="number" min="1" max="65535" required></label></div>
+            <label>TLS server name<input id="tls-name" placeholder="vpn.example.com" required autocomplete="off"><small>Must match the server certificate. Certificate verification stays enabled.</small></label>
+            <div class="fields equal"><label>Client routing<select id="mode"><option value="tun">Full device · TUN</option><option value="proxy">Selected apps · Proxy</option></select></label><label>IPv6 policy<select id="ipv6"><option value="block">Block in generated profile</option><option value="tunnel">Route through tunnel</option></select></label></div>
+            <details><summary>Advanced settings</summary><div class="advanced">
+              <label>Certificate path on server<input id="certificate" required></label><label>Private key path on server<input id="key" required></label>
+              <div class="fields equal"><label>Server listen address<input id="listen" required></label><label>Server DNS resolver<input id="server-dns" required></label></div>
+              <label>Server logging<select id="log-level"><option value="warn">Warnings</option><option value="error">Errors only</option><option value="info">Information</option></select></label>
+              <div class="fields equal"><label>Local proxy port<input id="mixed-port" type="number" min="1" max="65535" required></label><label>Local DNS port<input id="dns-port" type="number" min="1" max="65535" required></label></div>
+              <label>Client DNS · one HTTPS URL per line<textarea id="dns" rows="2" required></textarea></label><label>Bootstrap DNS · HTTPS URLs with IP hosts<textarea id="bootstrap-dns" rows="2" required></textarea></label>
+              <label>Direct routes · one CIDR per line<textarea id="direct-cidrs" rows="2" placeholder="192.168.0.0/16"></textarea><small>These destinations bypass the tunnel.</small></label>
+              <label class="check"><input id="udp" type="checkbox"> Enable UDP forwarding</label>
+              <label>Custom CA file on this computer · optional<input id="ca-file" placeholder="Leave blank for public certificate trust"><small>Currently supported only in Mihomo YAML. Other client targets and URL/QR exports require a publicly trusted server certificate.</small></label>
+              <label>Private state directory<input id="state-dir" readonly><small>To change this path, stop the UI and edit the configuration file.</small></label>
+            </div></details>
+            <div class="form-footer"><span>Saved to your local configuration file.</span><button type="submit">Save settings</button></div>
+          </form>
+        </section>
+        <div class="right-column">
+          <section class="card">
+            <div class="section-heading"><span class="step">02</span><div><h2>Your devices</h2><p>A separate credential for each device.</p></div></div>
+            <form id="device-form"><label class="sr-only" for="device-name">New device name</label><div class="inline"><input id="device-name" placeholder="e.g. my-laptop" pattern="[a-zA-Z0-9][a-zA-Z0-9_-]{0,47}" maxlength="48" required autocomplete="off"><button type="submit">Add device</button></div></form>
+            <ul id="devices" class="device-list"></ul><p id="empty-devices" class="empty">Your devices will appear here.<br>Save your server settings, then add one.</p>
+            <p class="footnote">Rotate replaces a device credential. Revoking takes effect after deploying the new server configuration and restarting the service.</p>
+          </section>
+          <section class="card">
+            <div class="section-heading"><span class="step">03</span><div><h2>Generate connection files</h2><p>Ready for your server and VPN client.</p></div></div>
+            <form id="export-form">
+              <label>VPN client<select id="export-client"></select></label>
+              <p id="client-note" class="footnote"></p>
+              <p id="client-scope" class="scope-note" hidden>Connection settings only. Configure routing, DNS, IPv6, and UDP separately in this app; the server form's client settings are not included.</p>
+              <label>Client files for<select id="export-device"><option value="">All active devices</option></select></label>
+              <div class="export-options"><label class="check"><input id="export-uri" type="checkbox"> Connection URL</label><label class="check"><input id="export-qr" type="checkbox"> QR image</label></div>
+              <p id="ca-note" class="footnote" hidden>Custom CA selected: export the YAML profile to preserve certificate verification.</p>
+              <p class="footnote">Server JSON and import instructions are included with the selected client export.</p>
+              <button type="submit" class="wide">Generate files <span aria-hidden="true">↗</span></button>
+            </form>
+            <div id="export-result" hidden><h3>Private export ready</h3><p id="export-status" class="footnote"></p><p id="export-path" class="path"></p><ul id="files" class="file-list"></ul><div id="qr-preview" hidden><img id="qr-image" alt="Private connection QR code"><button id="hide-qr" type="button" class="secondary">Hide QR</button><p class="footnote">This image contains a device credential. Scan it only with the intended device.</p></div><p class="footnote">Share only a device's own profile or QR. The server file contains every active device credential. Browser downloads use your browser's normal folder and permissions; protected originals remain at the path above.</p></div>
+          </section>
+        </div>
+      </div>
+      <footer><span>Local only · No cloud account · No telemetry</span><span>Check DNS, IPv6 and routing on your actual device.</span></footer>
+    </div>
+  </main>
+</body>
+</html>
